@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Weather Data</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+
+  <style>
+    .swal-overlay {
+      z-index: 1;
+      background-color: #E9EEF1;
+    }
+
+    .swal-modal {
+      background-color: #A9A9A9;
+      border: 3px solid white;
+    }
+
+    .swal-title {
+      margin: 0px;
+      font-size: 26px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+    }
+
+    .swal-text {
+      background-color: white;
+      font-size: 16px;
+      padding: 17px;
+      border: 1px solid #F0E1A1;
+      display: block;
+      margin: 22px;
+      text-align: center;
+      color: #61534e;
+    }
+
+    .swal-footer {
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 1px solid #E9EEF1;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-light bg-light justify-content-center ">
+    <span class="navbar-brand mb-0 h1 text-center">Weather Report</span>
+  </nav>
+  <div id="body"></div>
+  <script>
+
+    const getData = async (url) => {
+
+      let res = await fetch(url);
+
+      let data = await res.json();
+
+      console.log(data);
+
+      RenderDataToTable(data);
+
+    }
+
+    function HandleCountryData(data, i) {
+
+      const body = document.getElementById("body");
+
+      body.style.display = "grid";
+      body.style.grid = "450px / auto auto auto";
+      body.style.padding = "10px";
+
+      let card = document.createElement('div');
+      card.setAttribute("class", "card");
+      card.style.width = "22rem";
+      card.style.height = "25rem";
+      card.style.margin = "30px";
+
+      let flag = document.createElement('img');
+      flag.setAttribute("class", "card-img-top card-header h-50");
+      flag.src = data.flags.png;
+
+      card.appendChild(flag)
+
+      let cardbody = document.createElement("div");
+      cardbody.setAttribute("class", "card-body text-center");
+
+      let country = document.createElement('h2');
+      country.innerHTML = data.name;
+      country.setAttribute("class", "card-text");
+
+      cardbody.appendChild(country);
+
+      if (i != 8) {
+        let capital = document.createElement('h4');
+        capital.innerHTML = data.capital;
+        capital.setAttribute("id", i + " capital");
+        capital.classList.add = "card-text";
+
+        cardbody.appendChild(capital);
+      }
+      else {
+        let capital = document.createElement('h3');
+        capital.innerHTML = "Antartica";
+        capital.setAttribute("id", i + " capital");
+
+        cardbody.appendChild(capital);
+      }
+
+      let button = document.createElement('button');
+      button.innerHTML = "Weather";
+      button.setAttribute("id", i + " button");
+      button.setAttribute("class", "btn btn-outline-secondary");
+      button.addEventListener('click', async function handleclick(event) {
+        console.log(event.target.id[0], "hello");
+
+        let city = document.getElementById(event.target.id[0] + " capital").innerHTML;
+        let url = "";
+        if (event.target.id[0] != 8) {
+          url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=e41887fc4dafe284b4ed688ee69b83d5";
+          let res = await fetch(url);
+          let data = await res.json();
+
+          console.log('On button click', data);
+
+          let iconurl2 = "http://openweathermap.org/img/w/" + data.weather[0].icon + ".png";
+
+          let desc = data.weather[0].description;
+          let temp = parseInt(data.main.temp) - 273;
+
+          swal({
+            title: "Temperature = " + temp + "℃",
+            text: desc,
+            icon: iconurl2,
+            content: true,
+            className: "red-bg",
+          });
+
+        }
+        else {
+          url = "https:api.openweathermap.org/data/3.0/onecall?lat=-74.65&lon=4.48&appid=e41887fc4dafe284b4ed688ee69b83d5";
+          let res = await fetch(url);
+          let data = await res.json();
+
+          console.log('On button click', data);
+
+        }
+
+      });
+
+      cardbody.appendChild(button);
+      card.appendChild(cardbody);
+      body.appendChild(card);
+    }
+
+    function RenderDataToTable(data) {
+      for (i = 0; i < data.length; i++) {
+        HandleCountryData(data[i], i);
+      }
+
+    }
+
+    const url = "https://restcountries.com/v2/all";
+
+    getData(url);
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</body>
+
+</html>
